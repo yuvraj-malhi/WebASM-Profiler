@@ -23,7 +23,7 @@ var info = {
 };
 
 async function loadWasm(){
-    let response = await fetch('arithmetic.wasm');
+    let response = await fetch('arithmeticWS.wasm');
     let bytes = await response.arrayBuffer();
     let wasmObj = await WebAssembly.instantiate(bytes, info);
     wasmExports = wasmObj.instance.exports;

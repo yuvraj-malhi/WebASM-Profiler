@@ -14,106 +14,102 @@
             text-align:center;
         }
     </style>
+    <style>
+        #timeTaken{
+            display:block;
+            width:100%;
+            height:20px;
+            text-align:center;
+        }
+    </style>
     <script src="script.js"></script>
+    <script src="arithmeticJS.js"></script>
 </head>
 <body>
-    
-    <table>
-        <tr>
-            <td colspan="4"><input id="txtInput" style="text-align: right;" type="text"/></td>
-        </tr>
-        <tr>
-            <td colspan="4"><span id="spanOutput" id="output"></span></td>
-        </tr>
-        <tr>
-            <td colspan="4"><input type="button" value="Clear" onclick="javascript:clearAll()"/></td>
-        </tr>
-        <tr>
-            <td><input type="button" value="+" onclick="javascript:setOperation(this)"/></td>
-            <td><input type="button" value="-" onclick="javascript:setOperation(this)"/></td>
-            <td><input type="button" value="*" onclick="javascript:setOperation(this)"/></td>
-            <td><input type="button" value="/" onclick="javascript:setOperation(this)"/></td>
-        </tr>
-        <tr>
-            <td><input type="button" value="1" onclick="javascript:setArgument(this)"/></td>
-            <td><input type="button" value="2" onclick="javascript:setArgument(this)"/></td>
-            <td><input type="button" value="3" onclick="javascript:setArgument(this)"/></td>
-            <td><input type="button" value="4" onclick="javascript:setArgument(this)"/></td>
-        </tr>
-        <tr>
-            <td><input type="button" value="5" onclick="javascript:setArgument(this)"/></td>
-            <td><input type="button" value="6" onclick="javascript:setArgument(this)"/></td>
-            <td><input type="button" value="7" onclick="javascript:setArgument(this)"/></td>
-            <td><input type="button" value="8" onclick="javascript:setArgument(this)"/></td>
-        </tr>
-        <tr>
-            <td><input type="button" value="9" onclick="javascript:setArgument(this)"/></td>
-            <td><input type="button" value="0" onclick="javascript:setArgument(this)"/></td>
-            <td><input type="button" value="=" onclick="javascript:getResult()"/></td>
-            <td></td>
-        </tr>
+
+    <h1>JS - WASM Benchmarking Tool</h1>
+    <label for="inputNumber">Enter a number:</label>
+    <input type="number" id="inputNumber" step="any" placeholder="Enter a number">
+
+    <br>
+    <button onclick="performOperation('log')">Natural Logarithm (log)</button>
+    <button onclick="performOperation('sin')">Sine (sin)</button>
+    <button onclick="performOperation('exp')">Exponential (exp)</button>
+    <button onclick="performOperation('cos')">Cosine (cos)</button>
+    <br>
+
+    <table id="resultsTable">
+        <thead>
+            <tr>
+                <th>Operation</th>
+                <th>Input Number</th>
+                <th>Iterations</th>
+                <th>Result</th>
+                <th>Time Taken (JS)</th>
+                <th>Time Taken (WS)</th>
+            </tr>
+        </thead>
+        <tbody id="resultsBody">
+            <!-- Results will be added here -->
+        </tbody>
     </table>
 
     <script>
-        txtInput = document.querySelector('#txtInput');
-        spanOutput = document.querySelector('#spanOutput');
-        let arg1 = 0;
-        let arg2 = 0;
-        let hasArg2 = false;
-        let operation = '';
 
-        function setArgument(target){
-            let value = parseFloat(target.value);
-
-            //update the number in input
-            txtInput.value = txtInput.value.toString() + value.toString();
-
-            if(!hasArg2){ //Set 1st argument
-                arg1 = parseFloat(txtInput.value);
-                spanOutput.innerHTML = arg1;
-            }
-            else{ //Set 2nd argument
-                arg2 = parseFloat(txtInput.value);
-                spanOutput.innerHTML = `${arg1} ${operation} ${arg2}`;   
-            }
+        function setResult(result) {
+            document.getElementById('result').innerText = `Result: ${result}`;
         }
 
-        function setOperation(target){
-            operation = target.value;             
-            spanOutput.innerHTML = (hasArg2) ? `${arg1} ${operation} ${arg2}` : `${arg1} ${operation}`;    
-            hasArg2 = true;       
-            txtInput.value = '';
-            updateOutput();
-        }
 
-        function getResult(){
-            let result = 0;
-            switch(operation){
-                case '+':
-                    result = wasmExports.add(arg1, arg2);
+        function performOperation(operation) {
+            const inputNumber = parseFloat(document.getElementById('inputNumber').value);
+            var iterations = 0;
+            var result = 0;
+            var timeTakenWS = 0;
+            var timeTakenJS = 0;
+
+            switch (operation) {
+
+                case 'log':
+                    iterations = 30;
+                    result = wasmExports.logWS(inputNumber, iterations);
                     break;
-                case '-':
-                    result = wasmExports.subtract(arg1, arg2);
+                case 'sin':
+                    iterations = 30;
+                    result = wasmExports.sinWS(inputNumber, iterations);
                     break;
-                case '*':
-                    result = wasmExports.multiply(arg1, arg2);
+                case 'exp':
+                    iterations = 30;
+                    result = wasmExports.expWS(inputNumber, iterations);
                     break;
-                case '/':
-                    result = wasmExports.divide(arg1, arg2);
+                case 'cos':
+                    iterations = 30;
+                    result = wasmExports.cosWS(inputNumber, iterations);
                     break;
+                default:
+                    result = "Invalid operation";
             }
-            spanOutput.innerHTML = result;
-            txtInput.value = result;
-            arg1 = result;
-            hasArg2 = false;
+
+            displayResult(operation, inputNumber, iterations, result, timeTakenJS, timeTakenWS);
         }
 
-        function clearAll(){
-            arg1 = arg2 = 0;
-            operation = '';
-            hasArg2 = false;
-            txtInput.value = '';
-            spanOutput.innerHTML = '';
+        function displayResult(operation, inputNumber, iterations, result, timeTakenJS, timeTakenWS) {
+            const tableBody = document.getElementById('resultsBody');
+            const newRow = tableBody.insertRow();
+
+            const cellOperation = newRow.insertCell(0);
+            const cellInputNumber = newRow.insertCell(1);
+            const celliterations = newRow.insertCell(2);
+            const cellResult = newRow.insertCell(3);
+            const celltimeJS = newRow.insertCell(4);
+            const celltimeWS = newRow.insertCell(5);
+
+            cellOperation.innerText = operation;
+            cellInputNumber.innerText = inputNumber;
+            cellResult.innerText = result;
+            celliterations.innerText = iterations;
+            celltimeJS.innerText = timeTakenJS;
+            celltimeWS.innerText = timeTakenWS;
         }
 
     </script>
