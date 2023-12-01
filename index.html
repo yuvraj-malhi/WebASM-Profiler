@@ -28,16 +28,27 @@
 <body>
 
     <h1>JS - WASM Benchmarking Tool</h1>
+    
     <label for="inputNumber">Enter a number:</label>
     <input type="number" id="inputNumber" step="any" placeholder="Enter a number">
 
     <br>
-    <button onclick="performOperation('log')">Natural Logarithm (log)</button>
-    <button onclick="performOperation('sin')">Sine (sin)</button>
-    <button onclick="performOperation('exp')">Exponential (exp)</button>
-    <button onclick="performOperation('cos')">Cosine (cos)</button>
+    <label for="iterationsNumber">(Optional) Enter iterations:</label>
+    <input type="iterations" id="iterationsNumber" step="any" placeholder="Enter iterations">
+
+    <br>
+    <br>
+    <br><button onclick="performOperation('log')">Natural Logarithm (log)</button>
+    <br><button onclick="performOperation('sin')">Sine (sin)</button>
+    <br><button onclick="performOperation('exp')">Exponential (exp)</button>
+    <br><button onclick="performOperation('cos')">Cosine (cos)</button>
+    <br><button onclick="performOperation('piL')">Pi (Leibniz)</button>
+    <br><button onclick="performOperation('piB')">Pi (Bailey-Borwein-Plouffe)</button>
+    <br><button onclick="performOperation('ratio')">Golden Ratio (Iterative)</button>
+    <br><button onclick="performOperation('rFibb')">Golden Ratio (Fibonacci)</button>
     <br>
 
+    <br>
     <table id="resultsTable">
         <thead>
             <tr>
@@ -60,35 +71,99 @@
             document.getElementById('result').innerText = `Result: ${result}`;
         }
 
+        var startTime, endTime;
+        function start() {
+            startTime = new Date();
+        };
+
+        function end() {
+            endTime = new Date();
+            var timeDiff = endTime - startTime; //in ms
+            // strip the ms
+            return timeDiff;
+        }
+
 
         function performOperation(operation) {
             const inputNumber = parseFloat(document.getElementById('inputNumber').value);
-            var iterations = 0;
+            var iterations = 0; 
+            var iterInput = parseFloat(document.getElementById('iterationsNumber').value);
+            if(iterInput != NaN && iterInput != 0 && iterInput > 0)
+                iterations = iterInput
+            else
+                iterations = 30; // Default value of iterations
+
             var result = 0;
             var timeTakenWS = 0;
             var timeTakenJS = 0;
 
+            
+            
             switch (operation) {
 
                 case 'log':
-                    iterations = 30;
+                    start();
                     result = wasmExports.logWS(inputNumber, iterations);
+                    timeTakenWS = end();
+                    start();
+                    result = logJS(inputNumber, iterations);
+                    timeTakenJS = end();
                     break;
+
+                case 'piL':
+                    start();
+                    result = wasmExports.piLeibnizWS(iterations);
+                    timeTakenWS = end();
+                    start();
+                    result = piLeibnizJS(iterations);
+                    timeTakenJS = end();
+                    break;
+
+                case 'piB':
+                    start();
+                    result = wasmExports.piBBPWS(iterations);
+                    timeTakenWS = end();
+                    start();
+                    result = piBBPJS(iterations);
+                    timeTakenJS = end();
+                    break;
+
+                case 'ratio':
+                    start();
+                    result = wasmExports.ratioWS(iterations);
+                    timeTakenWS = end();
+                    start();
+                    result = ratioJS(iterations);
+                    timeTakenJS = end();
+                    break;
+
+                case 'rFibb':
+                    start();
+                    result = wasmExports.ratioFibbWS(iterations);
+                    timeTakenWS = end();
+                    start();
+                    result = ratioFibbJS(iterations);
+                    timeTakenJS = end();
+                    break;
+
                 case 'sin':
-                    iterations = 30;
+
                     result = wasmExports.sinWS(inputNumber, iterations);
                     break;
                 case 'exp':
-                    iterations = 30;
+
                     result = wasmExports.expWS(inputNumber, iterations);
                     break;
                 case 'cos':
-                    iterations = 30;
+ 
                     result = wasmExports.cosWS(inputNumber, iterations);
                     break;
                 default:
                     result = "Invalid operation";
             }
+            
+            
+
 
             displayResult(operation, inputNumber, iterations, result, timeTakenJS, timeTakenWS);
         }

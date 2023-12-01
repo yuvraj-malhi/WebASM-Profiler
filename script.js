@@ -1,6 +1,6 @@
 let wasmExports = null;
 
-let wasmMemory = new WebAssembly.Memory({initial: 1024, maximum: 1024});
+let wasmMemory = new WebAssembly.Memory({initial: 1024, maximum: 65536});
 
 let wasmTable = new WebAssembly.Table({
     'initial': 1,
