@@ -37,11 +37,13 @@ function cosJS(x, iterations) {
 
 function expJS(x, iterations) {
     let result = 1.0;
-    let term = 1.0;
+    let numerator = 1.0;
+    let denominator = 1.0;
 
-    for (let i = 1; i <= term; ++i) {
-        term *= x / i;
-        result += term;
+    for (let i = 1; i < iterations; ++i) {
+        numerator *= x;
+        denominator *= i;
+        result += numerator / denominator;
     }
 
     return result;
@@ -96,4 +98,89 @@ function ratioFibbJS(numTerms) {
     }
 
     return -1;  
+}
+
+function heapify(arr, n, i) {
+    let largest = i;
+    const left = 2 * i + 1;
+    const right = 2 * i + 2;
+
+    if (left < n && arr[left] > arr[largest])
+        largest = left;
+
+    if (right < n && arr[right] > arr[largest])
+        largest = right;
+
+    if (largest !== i) {
+        // Swap and recursively heapify the affected subtree
+        [arr[i], arr[largest]] = [arr[largest], arr[i]];
+        heapify(arr, n, largest);
+    }
+}
+
+// Function to perform heap sort
+function heapSort(arr) {
+    const n = arr.length;
+
+    // Build heap (rearrange array)
+    for (let i = Math.floor(n / 2) - 1; i >= 0; i--)
+        heapify(arr, n, i);
+
+    // One by one extract an element from the heap
+    for (let i = n - 1; i > 0; i--) {
+        // Move current root to end
+        [arr[0], arr[i]] = [arr[i], arr[0]];
+
+        // Call max heapify on the reduced heap
+        heapify(arr, i, 0);
+    }
+}
+
+function heapSortJS(n){
+    
+    if(n > 1000000)
+        n = 1000000;
+
+    var arraySize = 100000;
+    var myArray = new Array(arraySize);
+    
+    for (let i = 0; i < n; i++) {
+        myArray[i] = n-i;
+    }
+
+    heapSort(myArray, n);
+}
+
+
+function swap(arr, idx1, idx2) {
+    const temp = arr[idx1];
+    arr[idx1] = arr[idx2];
+    arr[idx2] = temp;
+}
+
+function bubbleSort(arr) {
+    const n = arr.length;
+
+    for (let i = 0; i < n-1; i++) {
+        for (let j = 0; j < n-i-1; j++) {
+            if (arr[j] > arr[j+1]) {
+                swap(arr, j, j+1);
+            }
+        }
+    }
+}
+
+function bubbleSortJS(n){
+    
+    if(n > 10000)
+        n = 10000;
+
+    var arraySize = 1000;
+    var myArray = new Array(arraySize);
+    
+    for (let i = 0; i < n; i++) {
+        myArray[i] = n-i;
+    }
+
+    bubbleSort(myArray, n);
 }

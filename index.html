@@ -28,7 +28,9 @@
 <body>
 
     <h1>JS - WASM Benchmarking Tool</h1>
-    
+
+    <button onclick="triggerOperation('test')" style="font-size: 16px; font-weight: bold;">CONDUCT TESTS</button><br><br><br>
+
     <label for="inputNumber">Enter a number:</label>
     <input type="number" id="inputNumber" step="any" placeholder="Enter a number">
 
@@ -38,18 +40,17 @@
 
     <br>
     <br>
-    <br><button onclick="performOperation('log')">Natural Logarithm (log)</button>
-    <br><button onclick="performOperation('sin')">Sine (sin)</button>
-    <br><button onclick="performOperation('exp')">Exponential (exp)</button>
-    <br><button onclick="performOperation('cos')">Cosine (cos)</button>
-    <br><button onclick="performOperation('piL')">Pi (Leibniz)</button>
-    <br><button onclick="performOperation('piB')">Pi (Bailey-Borwein-Plouffe)</button>
-    <br><button onclick="performOperation('ratio')">Golden Ratio (Iterative)</button>
-    <br><button onclick="performOperation('rFibb')">Golden Ratio (Fibonacci)</button>
+    <br><button onclick="triggerOperation('log')">Natural Logarithm (log)</button>
+    <br><button onclick="triggerOperation('piL')">&pi; (Leibniz)</button>
+    <br><button onclick="triggerOperation('piB')">&pi; (Bailey-Borwein-Plouffe)</button>
+    <br><button onclick="triggerOperation('ratio')">&phi; Golden Ratio (Iterative)</button>
+    <br><button onclick="triggerOperation('rFibb')">&phi; Golden Ratio (Fibonacci)</button>
+    <br><button onclick="triggerOperation('hsort')">Heap Sort </button>
+    <br><button onclick="triggerOperation('bsort')">Bubble Sort </button>
     <br>
 
     <br>
-    <table id="resultsTable">
+    <table id="resultsTable" border="1" cellpadding="5">
         <thead>
             <tr>
                 <th>Operation</th>
@@ -58,6 +59,7 @@
                 <th>Result</th>
                 <th>Time Taken (JS)</th>
                 <th>Time Taken (WS)</th>
+                <th>WaSM Performace (% JS)</th>
             </tr>
         </thead>
         <tbody id="resultsBody">
@@ -83,8 +85,8 @@
             return timeDiff;
         }
 
+        function triggerOperation(operation) {
 
-        function performOperation(operation) {
             const inputNumber = parseFloat(document.getElementById('inputNumber').value);
             var iterations = 0; 
             var iterInput = parseFloat(document.getElementById('iterationsNumber').value);
@@ -93,82 +95,135 @@
             else
                 iterations = 30; // Default value of iterations
 
+            if(operation != 'test')
+                performOperation(operation, inputNumber, iterations);
+            else{
+                performOperation('log', 10, 10000);
+                performOperation('log', 10, 100000);
+                performOperation('log', 10, 1000000);
+                performOperation('log', 10, 1000000);
+
+                performOperation('piL', 0, 100000);
+                performOperation('piL', 0, 1000000);
+                performOperation('piL', 0, 10000000);
+                performOperation('piL', 0, 100000000);
+
+                performOperation('piB', 0, 100000);
+                performOperation('piB', 0, 1000000);
+                performOperation('piB', 0, 10000000);
+                
+                performOperation('ratio', 0, 1000000);
+                performOperation('ratio', 0, 10000000);
+                performOperation('ratio', 0, 100000000);
+
+                performOperation('rFibb', 0, 1000000);
+                performOperation('rFibb', 0, 10000000);
+                performOperation('rFibb', 0, 100000000);
+
+                performOperation('hsort', 0, 10000);
+                performOperation('hsort', 0, 100000);
+                performOperation('hsort', 0, 1000000);
+
+                performOperation('bsort', 0, 100);
+                performOperation('bsort', 0, 1000);
+                performOperation('bsort', 0, 10000);
+
+            }
+
+        }
+
+        var AVG_ITER = 5;
+        function performOperation(operation, inputNumber, iterations) {
+
             var result = 0;
             var timeTakenWS = 0;
             var timeTakenJS = 0;
 
-            
-            
-            switch (operation) {
+            for(let i=0; i<AVG_ITER; i++){
+                switch (operation) {
 
-                case 'log':
-                    start();
-                    result = wasmExports.logWS(inputNumber, iterations);
-                    timeTakenWS = end();
-                    start();
-                    result = logJS(inputNumber, iterations);
-                    timeTakenJS = end();
-                    break;
+                    case 'log':
+                        start();
+                        result = wasmExports.logWS(inputNumber, iterations);
+                        timeTakenWS += end();
+                        start();
+                        result = logJS(inputNumber, iterations);
+                        timeTakenJS += end();
+                        break;
 
-                case 'piL':
-                    start();
-                    result = wasmExports.piLeibnizWS(iterations);
-                    timeTakenWS = end();
-                    start();
-                    result = piLeibnizJS(iterations);
-                    timeTakenJS = end();
-                    break;
+                    case 'piL':
+                        start();
+                        result = wasmExports.piLeibnizWS(iterations);
+                        timeTakenWS += end();
+                        start();
+                        result = piLeibnizJS(iterations);
+                        timeTakenJS += end();
+                        break;
 
-                case 'piB':
-                    start();
-                    result = wasmExports.piBBPWS(iterations);
-                    timeTakenWS = end();
-                    start();
-                    result = piBBPJS(iterations);
-                    timeTakenJS = end();
-                    break;
+                    case 'piB':
+                        start();
+                        result = wasmExports.piBBPWS(iterations);
+                        timeTakenWS += end();
+                        start();
+                        result = piBBPJS(iterations);
+                        timeTakenJS += end();
+                        break;
 
-                case 'ratio':
-                    start();
-                    result = wasmExports.ratioWS(iterations);
-                    timeTakenWS = end();
-                    start();
-                    result = ratioJS(iterations);
-                    timeTakenJS = end();
-                    break;
+                    case 'ratio':
+                        start();
+                        result = wasmExports.ratioWS(iterations);
+                        timeTakenWS += end();
+                        start();
+                        result = ratioJS(iterations);
+                        timeTakenJS += end();
+                        break;
 
-                case 'rFibb':
-                    start();
-                    result = wasmExports.ratioFibbWS(iterations);
-                    timeTakenWS = end();
-                    start();
-                    result = ratioFibbJS(iterations);
-                    timeTakenJS = end();
-                    break;
+                    case 'rFibb':
+                        start();
+                        result = wasmExports.ratioFibbWS(iterations);
+                        timeTakenWS += end();
+                        start();
+                        result = ratioFibbJS(iterations);
+                        timeTakenJS += end();
+                        break;
 
-                case 'sin':
+                    case 'hsort':
+                        start();
+                        result = wasmExports.heapSortWS(iterations);
+                        timeTakenWS += end();
+                        start();
+                        result = heapSortJS(iterations);
+                        timeTakenJS += end();
+                        break;
 
-                    result = wasmExports.sinWS(inputNumber, iterations);
-                    break;
-                case 'exp':
+                    case 'bsort':
+                        start();
+                        result = wasmExports.bubbleSortWS(iterations);
+                        timeTakenWS += end();
+                        start();
+                        result = bubbleSortJS(iterations);
+                        timeTakenJS += end();
+                        break;
 
-                    result = wasmExports.expWS(inputNumber, iterations);
-                    break;
-                case 'cos':
- 
-                    result = wasmExports.cosWS(inputNumber, iterations);
-                    break;
-                default:
-                    result = "Invalid operation";
+                    default:
+                        result = "Invalid operation";
+                }
             }
+
+            timeTakenJS /= AVG_ITER;
+            timeTakenWS /= AVG_ITER;
+            
+            var performance_m = 10000;
+            if(timeTakenWS != 0)
+                performance_m = timeTakenJS * 100 / timeTakenWS;
             
             
-
-
-            displayResult(operation, inputNumber, iterations, result, timeTakenJS, timeTakenWS);
+            performance_m = parseFloat(performance_m.toFixed(2));
+            performance_s = performance_m.toString() + '%'
+            displayResult(operation, inputNumber, iterations, result, timeTakenJS, timeTakenWS, performance_s);
         }
 
-        function displayResult(operation, inputNumber, iterations, result, timeTakenJS, timeTakenWS) {
+        function displayResult(operation, inputNumber, iterations, result, timeTakenJS, timeTakenWS, performance_s) {
             const tableBody = document.getElementById('resultsBody');
             const newRow = tableBody.insertRow();
 
@@ -178,13 +233,15 @@
             const cellResult = newRow.insertCell(3);
             const celltimeJS = newRow.insertCell(4);
             const celltimeWS = newRow.insertCell(5);
+            const celltimePF = newRow.insertCell(6);
 
             cellOperation.innerText = operation;
             cellInputNumber.innerText = inputNumber;
             cellResult.innerText = result;
             celliterations.innerText = iterations;
-            celltimeJS.innerText = timeTakenJS;
-            celltimeWS.innerText = timeTakenWS;
+            celltimeJS.innerText = parseFloat(timeTakenJS.toFixed(2));
+            celltimeWS.innerText = parseFloat(timeTakenWS.toFixed(2));
+            celltimePF.innerText = performance_s;
         }
 
     </script>
